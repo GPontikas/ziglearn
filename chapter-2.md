@@ -730,20 +730,19 @@ test "split iterator" {
 }
 ```
 
-Some iterators have a `!?T` return type, as opposed to ?T. `!?T` requires that we unpack the error union before the optional, meaning that the work done to get to the next iteration may error. Here is an example of doing this with a loop. [`cwd`](https://ziglang.org/documentation/master/std/#std;fs.cwd) has to be opened with iterate permissions in order for the directory iterator to work.
+Some iterators have a `!?T` return type, as opposed to ?T. `!?T` requires that we unpack the error union before the optional, meaning that the work done to get to the next iteration may error. Here is an example of doing this with a loop. The current working directory [`cwd`](https://ziglang.org/documentation/master/std/#std;fs.cwd) has to be opened as an iterable directory [`IterableDir`](https://ziglang.org/documentation/master/std/#root;fs.IterableDir) in order for the directory iterator to exist and work.
 
 ```zig
 test "iterator looping" {
-    var iter = (try std.fs.cwd().openDir(
+    var iter = (try std.fs.cwd().openIterableDir(
         ".",
-        .{ .iterate = true },
     )).iterate();
 
     var file_count: usize = 0;
     while (try iter.next()) |entry| {
         if (entry.kind == .File) file_count += 1;
     }
-
+    
     try expect(file_count > 0);
 }
 ```
